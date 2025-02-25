@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "609559642425",
+    "project_id": "noamfinal",
+    "storage_bucket": "noamfinal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609559642425:android:3d0f67b952e0a5533da8e8",
+        "android_client_info": {
+          "package_name": "com.example.noam_final"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgn9PG-Ri1_LwE1mybM7uXRgqqbd0QBqw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
