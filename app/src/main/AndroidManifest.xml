@@ -37,6 +37,16 @@
         <activity android:name=".MenuActivity"
             android:exported="true" />
 
+        <activity android:name=".CreditActivity"
+            android:exported="true" />
+
+        <activity android:name=".GuideActivity"
+            android:exported="true"/>
+
+        <activity android:name=".ContactActivity"
+            android:exported="true"/>
+
+
 
     </application>
 

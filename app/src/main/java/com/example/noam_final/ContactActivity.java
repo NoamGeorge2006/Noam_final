@@ -31,6 +31,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
+        init();
     }
 
 
@@ -73,7 +74,7 @@ public class ContactActivity extends AppCompatActivity implements View.OnClickLi
         Intent email = new Intent(Intent.ACTION_SEND);
         email.setData(Uri.parse("malito:"));
         email.setType("text/plain");
-        email.putExtra(Intent.EXTRA_EMAIL, new String[]{"orkalimi123@gmail.com"});
+        email.putExtra(Intent.EXTRA_EMAIL, new String[]{"calendunity@gmail.com"});
         email.putExtra(Intent.EXTRA_SUBJECT, name);
         email.putExtra(Intent.EXTRA_TEXT, message);
         email.setType("message/rfc822");
