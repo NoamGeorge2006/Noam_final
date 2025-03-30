@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/background_gray"
+    >
+
+    <!-- Month Navigation Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/rounded_baby_pink_background"
+        android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/btnPreviousMonth"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Previous month"
+            android:tint="@color/black"/>
+
+        <TextView
+            android:id="@+id/tvMonthTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="March 2025"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:gravity="center"/>
+
+        <ImageButton
+            android:id="@+id/btnNextMonth"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@android:drawable/ic_media_next"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Next month"
+            android:tint="@color/black"/>
+    </LinearLayout>
+
+    <!-- Weekday Headers -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/rounded_baby_pink_background"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sun"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Mon"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tue"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Wed"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Thu"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Fri"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sat"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+    </LinearLayout>
+
+    <!-- Calendar Grid -->
+    <GridView
+        android:id="@+id/gridCalendar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:numColumns="7"
+        android:verticalSpacing="4dp"
+        android:horizontalSpacing="4dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:background="@color/background_gray"
+        />
+</LinearLayout>

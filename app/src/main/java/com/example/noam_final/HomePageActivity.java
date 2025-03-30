@@ -9,21 +9,29 @@ import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.fragment.app.FragmentTransaction;
 
 public class HomePageActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ImageView menu_icon;
 
-
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_homepage);
         init();
-
+        loadCalendarFragment();
     }
+
     private void init() {
         menu_icon = findViewById(R.id.menu_icon);
         menu_icon.setOnClickListener(this);
+    }
+
+    private void loadCalendarFragment() {
+        CalendarFragment calendarFragment = new CalendarFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.calendar_container, calendarFragment);
+        transaction.commit();
     }
 
     public void onClick(View v) {
@@ -56,10 +64,4 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         }
         return true;
     }
-
-
-
-
-
-
 }
