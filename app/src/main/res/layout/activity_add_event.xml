@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_gray"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back Button"
+        android:scaleType="fitCenter"
+        android:src="@drawable/back_pic" />
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Add Event"
+            android:textAlignment="center"
+            android:textSize="50dp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_marginTop="15dp"
+            android:layout_width="200dp"
+            android:layout_height="170dp"
+            android:src="@drawable/calendar_pic" />
+
+        <EditText
+            android:layout_marginTop="15dp"
+            android:id="@+id/etTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Title"
+            android:padding="15dp" />
+
+        <EditText
+            android:id="@+id/etDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description"
+            android:padding="15dp" />
+
+        <EditText
+            android:id="@+id/etDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Date"
+            android:padding="15dp" />
+
+        <EditText
+            android:id="@+id/etLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:padding="15dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="20dp">
+
+        <!-- כפתור ותמונה ללוח השנה הפרטי -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginRight="3dp">
+
+            <ImageView
+                android:id="@+id/imgPrivateCalendar"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/private_icon" />
+
+            <Button
+                android:id="@+id/btnAddEventPrivate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/baby_pink"
+                android:text="Private Calendar"
+                android:textColor="@color/black" />
+        </LinearLayout>
+
+        <!-- כפתור ותמונה ללוח השנה הציבורי -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginLeft="3dp">
+
+            <ImageView
+                android:id="@+id/imgPublicCalendar"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/public_icon" />
+
+            <Button
+                android:id="@+id/btnAddEventPublic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/baby_pink"
+                android:text="Public Calendar"
+                android:textColor="@color/black" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+
+</LinearLayout>

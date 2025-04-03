@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 public class HomePageActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ImageView menu_icon;
+    private ImageView plus_icon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +26,8 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     private void init() {
         menu_icon = findViewById(R.id.menu_icon);
         menu_icon.setOnClickListener(this);
+        plus_icon = findViewById(R.id.plus_icon);
+        plus_icon.setOnClickListener(this);
     }
 
     private void loadCalendarFragment() {
@@ -37,6 +40,11 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View v) {
         if (v.getId() == R.id.menu_icon) {
             showPopup(v);
+        }
+
+        if (v.getId() == R.id.plus_icon) {
+            Intent intent = new Intent(this, AddEventActivity.class);
+            startActivity(intent);
         }
     }
 
