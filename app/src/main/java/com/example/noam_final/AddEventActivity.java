@@ -21,16 +21,20 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.UUID;
+import android.location.Location;
 
 public class AddEventActivity extends AppCompatActivity {
     private static final int CALENDAR_PERMISSION_CODE = 100;
+    private static final int LOCATION_PERMISSION_CODE = 101;
 
     private ImageButton btnBack;
     private EditText etTitle, etDescription, etDate, etLocation;
-    private Button btnAddEventPrivate, btnAddEventPublic;
+    private Button btnAddEventPrivate, btnAddEventPublic, btnGetLocation;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private Calendar selectedDate;
+    private LocationService locationService;
+    private double latitude, longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,7 @@ public class AddEventActivity extends AppCompatActivity {
         setupListeners();
         initializeFirebase();
         selectedDate = Calendar.getInstance();
+        locationService = new LocationService(this);
     }
 
     private void initializeViews() {
@@ -51,6 +56,7 @@ public class AddEventActivity extends AppCompatActivity {
         etLocation = findViewById(R.id.etLocation);
         btnAddEventPrivate = findViewById(R.id.btnAddEventPrivate);
         btnAddEventPublic = findViewById(R.id.btnAddEventPublic);
+        btnGetLocation = findViewById(R.id.btnGetLocation);
     }
 
     private void setupListeners() {
@@ -58,6 +64,7 @@ public class AddEventActivity extends AppCompatActivity {
         etDate.setOnClickListener(v -> showDatePicker());
         btnAddEventPrivate.setOnClickListener(v -> checkCalendarPermissionAndAddEvent(false));
         btnAddEventPublic.setOnClickListener(v -> checkCalendarPermissionAndAddEvent(true));
+        btnGetLocation.setOnClickListener(v -> checkLocationPermissionAndGetLocation());
     }
 
     private void initializeFirebase() {
@@ -88,12 +95,12 @@ public class AddEventActivity extends AppCompatActivity {
     private void checkCalendarPermissionAndAddEvent(boolean isPublic) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR)
                 != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR)
-                != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR)
+                        != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{
-                        Manifest.permission.WRITE_CALENDAR,
-                        Manifest.permission.READ_CALENDAR
+                            Manifest.permission.WRITE_CALENDAR,
+                            Manifest.permission.READ_CALENDAR
                     },
                     CALENDAR_PERMISSION_CODE);
         } else {
@@ -101,14 +108,40 @@ public class AddEventActivity extends AppCompatActivity {
         }
     }
 
+    private void checkLocationPermissionAndGetLocation() {
+        if (!locationService.hasLocationPermissions()) {
+            locationService.requestLocationPermissions(this, LOCATION_PERMISSION_CODE);
+        } else {
+            fetchLocation();
+        }
+    }
+
+    private void fetchLocation() {
+        locationService.getLastLocation(location -> {
+            if (location != null) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                etLocation.setText(latitude + ", " + longitude);
+            } else {
+                Toast.makeText(this, "Unable to fetch location. Please enter manually.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CALENDAR_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                addEvent(false); // Default to private if permission just granted
+                addEvent(false);
             } else {
                 Toast.makeText(this, "Calendar permission is required to add events", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == LOCATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchLocation();
+            } else {
+                Toast.makeText(this, "Location permission is required to fetch current location", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -129,15 +162,11 @@ public class AddEventActivity extends AppCompatActivity {
             return;
         }
 
-        // Create Event object
         String eventId = UUID.randomUUID().toString();
         String userId = mAuth.getCurrentUser().getUid();
-        Event event = new Event(eventId, title, description, date, location, isPublic, userId);
+        Event event = new Event(eventId, title, description, date, location, isPublic, userId, latitude, longitude);
 
-        // Add to Firebase
         addEventToFirebase(event);
-
-        // Add to device calendar
         addEventToDeviceCalendar(event);
     }
 
@@ -159,30 +188,24 @@ public class AddEventActivity extends AppCompatActivity {
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
 
-        // Get the default calendar ID
         String[] projection = new String[]{CalendarContract.Calendars._ID};
         String selection = CalendarContract.Calendars.IS_PRIMARY + " = 1";
         android.database.Cursor cursor = cr.query(CalendarContract.Calendars.CONTENT_URI, projection, selection, null, null);
-        
-        long calendarId = 1; // Default fallback
+
+        long calendarId = 1;
         if (cursor != null && cursor.moveToFirst()) {
             calendarId = cursor.getLong(0);
             cursor.close();
         }
 
-        // Set event details
         values.put(CalendarContract.Events.CALENDAR_ID, calendarId);
         values.put(CalendarContract.Events.TITLE, event.getTitle());
         values.put(CalendarContract.Events.DESCRIPTION, event.getDescription());
         values.put(CalendarContract.Events.EVENT_LOCATION, event.getLocation());
-
-        // Set time
         long startMillis = selectedDate.getTimeInMillis();
         values.put(CalendarContract.Events.DTSTART, startMillis);
-        values.put(CalendarContract.Events.DTEND, startMillis + 3600000); // 1 hour duration
+        values.put(CalendarContract.Events.DTEND, startMillis + 3600000);
         values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
-
-        // Event status
         values.put(CalendarContract.Events.HAS_ALARM, 1);
 
         try {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/joinGroup"
+        android:title="Join a new group" />
+    <item
+        android:id="@+id/addContact"
+        android:title="Add a new contact" />
+</menu>

@@ -14,8 +14,6 @@
         android:scaleType="fitCenter"
         android:src="@drawable/back_pic" />
 
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,12 +58,29 @@
             android:hint="Date"
             android:padding="15dp" />
 
-        <EditText
-            android:id="@+id/etLocation"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Location"
-            android:padding="15dp" />
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <EditText
+                android:id="@+id/etLocation"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Location"
+                android:padding="15dp" />
+
+            <Button
+                android:id="@+id/btnGetLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Get Location"
+                android:backgroundTint="@color/baby_pink"
+                android:textColor="@color/black"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -76,7 +91,6 @@
         android:gravity="center"
         android:layout_marginTop="20dp">
 
-        <!-- כפתור ותמונה ללוח השנה הפרטי -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -100,7 +114,6 @@
                 android:textColor="@color/black" />
         </LinearLayout>
 
-        <!-- כפתור ותמונה ללוח השנה הציבורי -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -125,9 +138,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
-
-
-
 
 </LinearLayout>

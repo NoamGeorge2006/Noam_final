@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_gray"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back Button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/back_pic" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvGroupTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Add a new contact"
+            android:textAlignment="center"
+            android:textSize="40dp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etContactEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Enter Contact Email"
+            android:inputType="textEmailAddress"
+            android:padding="15dp" />
+
+
+        <Button
+            android:layout_marginTop="20dp"
+            android:id="@+id/btnFindContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/baby_pink"
+            android:text="Find contact"
+            android:textColor="@color/black" />
+
+        <ProgressBar
+            android:layout_marginTop="35dp"
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvContactFound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center"
+            android:textColor="@android:color/holo_green_dark"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+
+        <!-- Here there will be only one contact with its email -->
+        <ListView
+            android:id="@+id/lvContact"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:background="@android:color/white"
+            android:padding="8dp" />
+
+        <Button
+            android:id="@+id/btnAddContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/baby_pink"
+            android:text="Add Contact"
+            android:textColor="@color/black" />
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

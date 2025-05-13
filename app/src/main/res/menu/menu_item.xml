@@ -10,4 +10,7 @@
     <item
         android:id="@+id/contact"
         android:title="Contact" />
+    <item
+        android:id="@+id/groups"
+        android:title="Manage Groups" />
 </menu>

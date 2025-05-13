@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentTransaction;
 public class HomePageActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ImageView menu_icon;
     private ImageView plus_icon;
+    private GroupManager groupManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_homepage);
         init();
         loadCalendarFragment();
+        groupManager = new GroupManager();
     }
 
     private void init() {
@@ -68,6 +70,10 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         }
         if (id == R.id.guide) {
             t = new Intent(this, GuideActivity.class);
+            startActivity(t);
+        }
+        if (id == R.id.groups){
+            t = new Intent(this, GroupActivity.class);
             startActivity(t);
         }
         return true;
