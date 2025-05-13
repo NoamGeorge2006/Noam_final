@@ -12,9 +12,11 @@ public class Event {
     private boolean isPublic;
     private String userId;
     private long createdAt;
+    private double latitude;
+    private double longitude;
 
     // Constructor
-    public Event(String id, String title, String description, String date, String location, boolean isPublic, String userId) {
+    public Event(String id, String title, String description, String date, String location, boolean isPublic, String userId, double latitude, double longitude) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -23,6 +25,8 @@ public class Event {
         this.isPublic = isPublic;
         this.userId = userId;
         this.createdAt = System.currentTimeMillis();
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     // Empty constructor for Firebase
@@ -93,6 +97,22 @@ public class Event {
         this.createdAt = createdAt;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
     // Convert to Map for Firebase
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
@@ -104,6 +124,8 @@ public class Event {
         result.put("isPublic", isPublic);
         result.put("userId", userId);
         result.put("createdAt", createdAt);
+        result.put("latitude", latitude);
+        result.put("longitude", longitude);
         return result;
     }
 }
