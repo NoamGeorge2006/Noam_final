@@ -119,6 +119,8 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="@color/black"/>
+
+
     </LinearLayout>
 
     <!-- Calendar Grid -->
@@ -134,4 +136,13 @@
         android:gravity="center"
         android:background="@color/background_gray"
         />
+
+<!--    <ProgressBar-->
+<!--        android:id="@+id/progressBar"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerInParent="true"-->
+<!--        android:visibility="gone" />-->
+
+
 </LinearLayout>

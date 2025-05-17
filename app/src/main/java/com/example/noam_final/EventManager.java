@@ -1,53 +1,67 @@
 package com.example.noam_final;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventManager {
-    private DatabaseReference database;
+    private FirebaseFirestore db;
 
     public EventManager() {
-        // Initializing Firebase Database
-        database = FirebaseDatabase.getInstance().getReference("events");
+        db = FirebaseFirestore.getInstance();
     }
 
-    public void addEvent(Event event) {
-        String eventId = database.push().getKey();
-        event.setId(eventId);
-        if (eventId != null) {
-            database.child(eventId).setValue(event);
-        }
+    // Add an event to Firestore
+    public void addEvent(Event event, OnEventOperationListener listener) {
+        db.collection("events")
+                .document(event.getId())
+                .set(event.toMap())
+                .addOnSuccessListener(aVoid -> listener.onSuccess())
+                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
     }
 
-    // Method to get all events from Firebase (can be modified for filtering)
-    public void getAllEvents(ValueEventListener listener) {
-        database.addListenerForSingleValueEvent(listener);
+    // Get all events for a user (public events or private events created by the user)
+    public void getUserEvents(String userId, OnEventsFetchedListener listener) {
+        db.collection("events")
+                .whereEqualTo("isPublic", true) // Public events
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Event> events = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Event event = document.toObject(Event.class);
+                        events.add(event);
+                    }
+                    // Also fetch private events created by the user
+                    fetchPrivateEvents(userId, events, listener);
+                })
+                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
     }
 
-//    דוגמה לשימוש במתודה getAllEvents (לדוגמה בHomePageActivity):
-//    eventManager.getAllEvents(new ValueEventListener() {
-//        @Override
-//        public void onDataChange(@NonNull DataSnapshot snapshot) {
-//            List<Event> eventsList = new ArrayList<>();
-//            for (DataSnapshot eventSnapshot : snapshot.getChildren()) {
-//                Event event = eventSnapshot.getValue(Event.class);
-//                if (event != null) {
-//                    eventsList.add(event);
-//                }
-//            }
-//            // כאן אפשר לעדכן UI (למשל, להכניס לרשימה ב-RecyclerView)
-//        }
-//
-//        @Override
-//        public void onCancelled(@NonNull DatabaseError error) {
-//            Log.e("Firebase", "Error loading events: " + error.getMessage());
-//        }
-//    });
+    // Helper method to fetch private events
+    private void fetchPrivateEvents(String userId, List<Event> events, OnEventsFetchedListener listener) {
+        db.collection("events")
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("isPublic", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Event event = document.toObject(Event.class);
+                        events.add(event);
+                    }
+                    listener.onEventsFetched(events);
+                })
+                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
+    }
 
+    // Listener interfaces
+    public interface OnEventOperationListener {
+        void onSuccess();
+        void onFailure(String error);
+    }
 
+    public interface OnEventsFetchedListener {
+        void onEventsFetched(List<Event> events);
+        void onFailure(String error);
+    }
 }

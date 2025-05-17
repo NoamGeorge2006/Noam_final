@@ -85,6 +85,10 @@
         <activity android:name=".JoinNewGroupActivity"
             android:exported="true"/>
 
+        <activity android:name=".EventListActivity"
+            android:exported="true"/>
+
+
 
     </application>
 
