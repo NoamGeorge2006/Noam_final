@@ -88,6 +88,9 @@
         <activity android:name=".EventListActivity"
             android:exported="true"/>
 
+        <activity android:name=".EventDetailActivity"
+            android:exported="true"/>
+
 
 
     </application>

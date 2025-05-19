@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -147,6 +148,7 @@ public class AddEventActivity extends AppCompatActivity {
     }
 
     private void addEvent(boolean isPublic) {
+        Log.d("AddEventActivity", "Current user: " + (mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "null"));
         if (mAuth.getCurrentUser() == null) {
             Toast.makeText(this, "Please log in to add events", Toast.LENGTH_SHORT).show();
             finish();
@@ -171,15 +173,18 @@ public class AddEventActivity extends AppCompatActivity {
     }
 
     private void addEventToFirebase(Event event) {
+        Log.d("AddEventActivity", "Saving event: " + event.getTitle() + ", Date: " + event.getDate());
         db.collection("events")
                 .document(event.getId())
                 .set(event.toMap())
                 .addOnSuccessListener(aVoid -> {
                     String visibility = event.isPublic() ? "public" : "private";
+                    Log.d("AddEventActivity", "Event saved: " + event.getTitle());
                     Toast.makeText(this, "Event added successfully as " + visibility, Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
+                    Log.e("AddEventActivity", "Failed to save event: " + e.getMessage());
                     Toast.makeText(this, "Failed to add event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }

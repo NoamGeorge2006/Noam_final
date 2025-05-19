@@ -1,5 +1,7 @@
 package com.example.noam_final;
 
+import android.util.Log;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
@@ -23,17 +25,20 @@ public class EventManager {
 
     // Get all events for a user (public events or private events created by the user)
     public void getUserEvents(String userId, OnEventsFetchedListener listener) {
+        Log.d("EventManager", "Querying events for user: " + userId);
         db.collection("events")
-                .whereEqualTo("isPublic", true) // Public events
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> events = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Event event = document.toObject(Event.class);
-                        events.add(event);
+                        Log.d("EventManager", "Found event: " + event.getTitle() + ", UserID: " + event.getUserId() + ", Public: " + event.isPublic());
+                        if (event.isPublic() || event.getUserId().equals(userId)) {
+                            events.add(event);
+                        }
                     }
-                    // Also fetch private events created by the user
-                    fetchPrivateEvents(userId, events, listener);
+                    Log.d("EventManager", "Total events fetched: " + events.size());
+                    listener.onEventsFetched(events);
                 })
                 .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
     }

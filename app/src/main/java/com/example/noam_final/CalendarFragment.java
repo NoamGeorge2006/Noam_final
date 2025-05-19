@@ -2,6 +2,7 @@ package com.example.noam_final;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ public class CalendarFragment extends Fragment {
         super.onCreate(savedInstanceState);
         eventManager = new EventManager();
         currentMonth = Calendar.getInstance();
+        currentMonth.set(2025, Calendar.MAY, 1); // Set to May 1, 2025
         eventsByDate = new HashMap<>();
     }
 
@@ -87,17 +89,21 @@ public class CalendarFragment extends Fragment {
     }
 
     private void fetchEvents() {
-//        progressBar.setVisibility(View.VISIBLE);
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.d("CalendarFragment", "Fetching events for user: " + userId);
         eventManager.getUserEvents(userId, new EventManager.OnEventsFetchedListener() {
             @Override
             public void onEventsFetched(List<Event> events) {
-//                progressBar.setVisibility(View.GONE);
+                Log.d("CalendarFragment", "Fetched " + events.size() + " events");
                 eventsByDate.clear();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                SimpleDateFormat inputFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 for (Event event : events) {
                     try {
-                        Date eventDate = dateFormat.parse(event.getDate());
+                        String eventDateStr = event.getDate();
+                        Date eventDate = inputFormat.parse(eventDateStr);
+                        String normalizedEventDate = outputFormat.format(eventDate);
+                        Log.d("CalendarFragment", "Event: " + event.getTitle() + ", Date: " + eventDateStr + ", Normalized: " + normalizedEventDate + ", UserID: " + event.getUserId() + ", isPublic: " + event.isPublic());
                         if (eventDate != null) {
                             Calendar eventCal = Calendar.getInstance();
                             eventCal.setTime(eventDate);
@@ -108,19 +114,23 @@ public class CalendarFragment extends Fragment {
                                     eventsByDate.put(eventDate, new ArrayList<>());
                                 }
                                 eventsByDate.get(eventDate).add(event);
+                                Log.d("CalendarFragment", "Added event to date: " + normalizedEventDate);
+                            } else {
+                                Log.d("CalendarFragment", "Event date " + normalizedEventDate + " not in current month");
                             }
                         }
                     } catch (Exception e) {
-                        Toast.makeText(getContext(), "Error parsing event date: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("CalendarFragment", "Error parsing event date: " + event.getDate() + ", Error: " + e.getMessage());
                     }
                 }
+                Log.d("CalendarFragment", "Events by date size: " + eventsByDate.size());
                 calendarAdapter.updateEvents(eventsByDate);
+                calendarAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(String error) {
-//                progressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Error fetching events: " + error, Toast.LENGTH_SHORT).show();
+                Log.e("CalendarFragment", "Error fetching events: " + error);
             }
         });
     }
