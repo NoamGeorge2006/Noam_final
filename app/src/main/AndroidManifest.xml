@@ -55,9 +55,6 @@
         <activity android:name=".HomePageActivity"
             android:exported="true" />
 
-        <activity android:name=".MenuActivity"
-            android:exported="true" />
-
         <activity android:name=".CreditActivity"
             android:exported="true" />
 

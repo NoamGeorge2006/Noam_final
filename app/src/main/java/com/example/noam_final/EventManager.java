@@ -63,24 +63,51 @@ public class EventManager {
                 });
     }
 
-    // Get all events for a user (public events or private events created by the user)
+    // Get events for a user (only their own events)
     public void getUserEvents(String userId, OnEventsFetchedListener listener) {
-        Log.d("EventManager", "Querying events for user: " + userId);
+        Log.d(TAG, "Querying events for user: " + userId);
+        
+        // Query only events that belong to this user
         db.collection("events")
+                .whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> events = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Event event = document.toObject(Event.class);
-                        Log.d("EventManager", "Found event: " + event.getTitle() + ", UserID: " + event.getUserId() + ", Public: " + event.isPublic());
-                        if (event.isPublic() || event.getUserId().equals(userId)) {
-                            events.add(event);
-                        }
+                        Log.d(TAG, "Found event: " + event.getTitle() + ", UserID: " + event.getUserId());
+                        events.add(event);
                     }
-                    Log.d("EventManager", "Total events fetched: " + events.size());
+                    Log.d(TAG, "Total events fetched for user " + userId + ": " + events.size());
                     listener.onEventsFetched(events);
                 })
-                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching events for user " + userId, e);
+                    listener.onFailure(e.getMessage());
+                });
+    }
+
+    // Get public events (events that are marked as public)
+    public void getPublicEvents(OnEventsFetchedListener listener) {
+        Log.d(TAG, "Querying public events");
+        
+        db.collection("events")
+                .whereEqualTo("isPublic", true)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Event> events = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Event event = document.toObject(Event.class);
+                        Log.d(TAG, "Found public event: " + event.getTitle());
+                        events.add(event);
+                    }
+                    Log.d(TAG, "Total public events fetched: " + events.size());
+                    listener.onEventsFetched(events);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching public events", e);
+                    listener.onFailure(e.getMessage());
+                });
     }
 
     // Helper method to fetch private events

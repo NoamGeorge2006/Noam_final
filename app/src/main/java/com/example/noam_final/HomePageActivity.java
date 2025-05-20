@@ -6,15 +6,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class HomePageActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ImageView menu_icon;
     private ImageView plus_icon;
     private GroupManager groupManager;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +27,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         init();
         loadCalendarFragment();
         groupManager = new GroupManager();
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private void init() {
@@ -75,6 +80,17 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         if (id == R.id.groups){
             t = new Intent(this, GroupActivity.class);
             startActivity(t);
+        }
+        if (id == R.id.logout) {
+            // Sign out from Firebase
+            mAuth.signOut();
+            Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+            
+            // Clear all activities from the stack and start MainActivity
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         }
         return true;
     }

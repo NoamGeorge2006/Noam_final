@@ -13,4 +13,8 @@
     <item
         android:id="@+id/groups"
         android:title="Manage Groups" />
+    <item
+        android:id="@+id/logout"
+        android:title="Logout"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel" />
 </menu>
