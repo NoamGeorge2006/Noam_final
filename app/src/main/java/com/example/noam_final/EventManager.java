@@ -9,6 +9,7 @@ import java.util.List;
 
 public class EventManager {
     private FirebaseFirestore db;
+    private static final String TAG = "EventManager";
 
     public EventManager() {
         db = FirebaseFirestore.getInstance();
@@ -21,6 +22,45 @@ public class EventManager {
                 .set(event.toMap())
                 .addOnSuccessListener(aVoid -> listener.onSuccess())
                 .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
+    }
+
+    // Delete an event from Firestore
+    public void deleteEvent(String eventId, String userId, OnEventOperationListener listener) {
+        Log.d(TAG, "Attempting to delete event: " + eventId + " for user: " + userId);
+        
+        // First verify that the event belongs to the user
+        db.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Event event = documentSnapshot.toObject(Event.class);
+                        if (event != null && event.getUserId().equals(userId)) {
+                            // Delete the event
+                            db.collection("events")
+                                    .document(eventId)
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "Event successfully deleted");
+                                        listener.onSuccess();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error deleting event", e);
+                                        listener.onFailure(e.getMessage());
+                                    });
+                        } else {
+                            Log.e(TAG, "User does not have permission to delete this event");
+                            listener.onFailure("You don't have permission to delete this event");
+                        }
+                    } else {
+                        Log.e(TAG, "Event not found");
+                        listener.onFailure("Event not found");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error checking event ownership", e);
+                    listener.onFailure(e.getMessage());
+                });
     }
 
     // Get all events for a user (public events or private events created by the user)

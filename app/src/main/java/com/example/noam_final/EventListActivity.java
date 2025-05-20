@@ -45,19 +45,42 @@ public class EventListActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         eventList = new ArrayList<>();
-        eventAdapter = new EventAdapter(eventList, event -> {
-            // Handle event click - navigate to event details
-            Intent intent = new Intent(EventListActivity.this, EventDetailActivity.class);
-            intent.putExtra("eventTitle", event.getTitle());
-            intent.putExtra("eventDate", event.getDate());
-            intent.putExtra("eventDescription", event.getDescription());
-            intent.putExtra("eventLocation", event.getLocation());
-            intent.putExtra("eventIsPublic", event.isPublic());
-            startActivity(intent);
+        Log.d("EventListActivity", "Setting up RecyclerView");
+        
+        eventAdapter = new EventAdapter(eventList, new EventAdapter.OnEventClickListener() {
+            @Override
+            public void onEventClick(Event event) {
+                Log.d("EventListActivity", "onEventClick called with event: " + (event != null ? event.getTitle() : "null"));
+                if (event != null) {
+                    try {
+                        Intent intent = new Intent(EventListActivity.this, EventDetailActivity.class);
+                        intent.putExtra("eventId", event.getId());
+                        intent.putExtra("eventTitle", event.getTitle());
+                        intent.putExtra("eventDate", event.getDate());
+                        intent.putExtra("eventDescription", event.getDescription());
+                        intent.putExtra("eventLocation", event.getLocation());
+                        intent.putExtra("eventIsPublic", event.isPublic());
+                        intent.putExtra("eventLatitude", event.getLatitude());
+                        intent.putExtra("eventLongitude", event.getLongitude());
+                        
+                        Log.d("EventListActivity", "Starting EventDetailActivity with event: " + event.getTitle());
+                        startActivity(intent);
+                        Log.d("EventListActivity", "Successfully started EventDetailActivity");
+                    } catch (Exception e) {
+                        Log.e("EventListActivity", "Error starting EventDetailActivity", e);
+                        Toast.makeText(EventListActivity.this, "Error opening event details: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e("EventListActivity", "Clicked event is null");
+                    Toast.makeText(EventListActivity.this, "Invalid event data", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(eventAdapter);
+        recyclerView.setNestedScrollingEnabled(false);
+        Log.d("EventListActivity", "RecyclerView setup completed");
     }
 
     private void initializeFirebase() {

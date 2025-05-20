@@ -47,8 +47,6 @@
             android:textSize="20dp"
             android:textStyle="bold" />
 
-
-
         <!-- Date -->
         <TextView
             android:id="@+id/tvEventDate"
@@ -89,5 +87,15 @@
             android:textSize="16sp" />
 
     </LinearLayout>
+
+    <!-- Delete Button -->
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#FF0000"
+        android:text="Delete Event"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>
