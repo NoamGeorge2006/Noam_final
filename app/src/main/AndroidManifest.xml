@@ -47,8 +47,10 @@
 
         <activity android:name=".LoginActivity"
             android:exported="true" />
+
         <activity android:name=".SignUpActivity"
             android:exported="true" />
+
         <activity android:name=".ForgetPasswordActivity"
             android:exported="true" />
 
@@ -67,28 +69,10 @@
         <activity android:name=".AddEventActivity"
             android:exported="true"/>
 
-        <activity android:name=".ContactDetailActivity"
-            android:exported="true"/>
-
-        <activity android:name=".GroupActivity"
-            android:exported="true"/>
-
-        <activity android:name=".GroupDetailActivity"
-            android:exported="true"/>
-
-        <activity android:name=".AddContactActivity"
-            android:exported="true"/>
-
-        <activity android:name=".JoinNewGroupActivity"
-            android:exported="true"/>
-
         <activity android:name=".EventListActivity"
             android:exported="true"/>
 
         <activity android:name=".EventDetailActivity"
-            android:exported="true"/>
-
-        <activity android:name=".CreateGroupActivity"
             android:exported="true"/>
 
         <activity android:name=".FollowRequestsActivity"

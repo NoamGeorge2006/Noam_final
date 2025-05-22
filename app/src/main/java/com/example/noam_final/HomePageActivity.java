@@ -17,7 +17,6 @@ import com.google.firebase.auth.FirebaseAuth;
 public class HomePageActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ImageView menu_icon;
     private ImageView plus_icon;
-    private GroupManager groupManager;
     private FirebaseAuth mAuth;
 
     @Override
@@ -26,7 +25,6 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_homepage);
         init();
         loadCalendarFragment();
-        groupManager = new GroupManager();
         mAuth = FirebaseAuth.getInstance();
     }
 
