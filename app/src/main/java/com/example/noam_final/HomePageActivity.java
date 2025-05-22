@@ -77,8 +77,11 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             t = new Intent(this, GuideActivity.class);
             startActivity(t);
         }
-        if (id == R.id.groups){
-            t = new Intent(this, GroupActivity.class);
+        if (id == R.id.follow_requests) {
+            t = new Intent(this, FollowRequestsActivity.class);
+            startActivity(t);
+        } else if (id == R.id.follow_notifications) {
+            t = new Intent(this, FollowNotificationsActivity.class);
             startActivity(t);
         }
         if (id == R.id.logout) {

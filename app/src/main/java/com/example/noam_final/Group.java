@@ -12,14 +12,16 @@ public class Group {
     private boolean isPublic;
     private List<String> events;
     private long createdAt;
+    private String code; // New field for group code
 
     // Constructor
-    public Group(String groupId, String name, boolean isPublic) {
+    public Group(String groupId, String name, boolean isPublic, String code) {
         this.groupId = groupId;
         this.name = name;
         this.events = new ArrayList<>();
         this.isPublic = isPublic;
         this.createdAt = System.currentTimeMillis();
+        this.code = code;
     }
 
     // Empty constructor for Firebase
@@ -68,6 +70,14 @@ public class Group {
         this.createdAt = createdAt;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     // Add event to group
     public void addEvent(String eventId) {
         if (!events.contains(eventId)) {
@@ -88,6 +98,7 @@ public class Group {
         result.put("events", events);
         result.put("isPublic", isPublic);
         result.put("createdAt", createdAt);
+        result.put("code", code);
         return result;
     }
 }

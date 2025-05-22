@@ -9,10 +9,13 @@
         android:title="Guide" />
     <item
         android:id="@+id/contact"
-        android:title="Contact" />
+        android:title="Contact Us" />
     <item
-        android:id="@+id/groups"
-        android:title="Manage Groups" />
+        android:id="@+id/follow_requests"
+        android:title="Follow Requests" />
+    <item
+        android:id="@+id/follow_notifications"
+        android:title="Follow Notifications" />
     <item
         android:id="@+id/logout"
         android:title="Logout"

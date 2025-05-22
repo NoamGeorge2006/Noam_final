@@ -88,6 +88,18 @@
         <activity android:name=".EventDetailActivity"
             android:exported="true"/>
 
+        <activity android:name=".CreateGroupActivity"
+            android:exported="true"/>
+
+        <activity android:name=".FollowRequestsActivity"
+            android:exported="true"/>
+
+        <activity android:name=".FollowNotificationsActivity"
+            android:exported="true"/>
+
+
+
+
 
 
     </application>

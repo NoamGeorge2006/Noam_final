@@ -28,59 +28,48 @@
         android:gravity="center"
         android:orientation="vertical">
 
+
+
+
+
         <TextView
-            android:id="@+id/tvGroupTitle"
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Join a new group"
+            android:text="Create a group"
             android:textAlignment="center"
             android:textSize="40dp"
             android:textStyle="bold" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilGroupCode"
+            android:id="@+id/tilGroupName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Group Code"
+            android:hint="Group Name"
             android:layout_marginTop="16dp">
 
             <EditText
-                android:id="@+id/etGroupCode"
+                android:id="@+id/etGroupName"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Group code input"/>
+                android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:layout_marginTop="20dp"
-            android:id="@+id/btnJoinGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/baby_pink"
-            android:text="Join Group"
-            android:textColor="@color/black" />
-
-        <ProgressBar
-            android:layout_marginTop="35dp"
-            android:id="@+id/progressBar"
+            android:id="@+id/btnCreateGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone" />
-
-        <ListView
-            android:id="@+id/lvPublicGroups"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="8dp"
-            android:background="@android:color/white"
-            android:padding="8dp" />
+            android:text="Create Group"
+            android:backgroundTint="@color/baby_pink"
+            android:textColor="@color/black"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_marginTop="16dp"/>
 
 
 
 
     </LinearLayout>
+
+
 
 </LinearLayout>

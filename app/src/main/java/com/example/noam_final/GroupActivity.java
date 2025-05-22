@@ -86,7 +86,11 @@ public class GroupActivity extends AppCompatActivity implements PopupMenu.OnMenu
     public boolean onMenuItemClick(MenuItem item) {
         Intent intent;
         int id = item.getItemId();
-        if (id == R.id.joinGroup) {
+        if (id == R.id.createGroup) {
+            intent = new Intent(GroupActivity.this, CreateGroupActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.joinGroup) {
             intent = new Intent(GroupActivity.this, JoinNewGroupActivity.class);
             startActivity(intent);
             return true;
@@ -148,5 +152,11 @@ public class GroupActivity extends AppCompatActivity implements PopupMenu.OnMenu
                 Toast.makeText(GroupActivity.this, "Error fetching contacts: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    protected void onResume() {
+        super.onResume();
+        fetchConnectedGroups();
+        fetchConnectedContacts();
     }
 }

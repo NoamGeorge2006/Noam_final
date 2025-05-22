@@ -166,20 +166,26 @@ public class AddEventActivity extends AppCompatActivity {
 
         String eventId = UUID.randomUUID().toString();
         String userId = mAuth.getCurrentUser().getUid();
+        
+        // Create event with explicit isPublic flag
         Event event = new Event(eventId, title, description, date, location, isPublic, userId, latitude, longitude);
+        Log.d("AddEventActivity", "Creating event with isPublic=" + isPublic);
 
         addEventToFirebase(event);
         addEventToDeviceCalendar(event);
     }
 
     private void addEventToFirebase(Event event) {
-        Log.d("AddEventActivity", "Saving event: " + event.getTitle() + ", Date: " + event.getDate());
+        Log.d("AddEventActivity", "Saving event: " + event.getTitle() + 
+            ", Date: " + event.getDate() + 
+            ", isPublic: " + event.isPublic());
+            
         db.collection("events")
                 .document(event.getId())
                 .set(event.toMap())
                 .addOnSuccessListener(aVoid -> {
                     String visibility = event.isPublic() ? "public" : "private";
-                    Log.d("AddEventActivity", "Event saved: " + event.getTitle());
+                    Log.d("AddEventActivity", "Event saved as " + visibility + ": " + event.getTitle());
                     Toast.makeText(this, "Event added successfully as " + visibility, Toast.LENGTH_SHORT).show();
                     finish();
                 })

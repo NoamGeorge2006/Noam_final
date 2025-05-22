@@ -1,29 +1,27 @@
 package com.example.noam_final;
 
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class JoinNewGroupActivity extends AppCompatActivity {
     private ImageButton btnBack;
-    private EditText etGroupSearch;
-    private Button btnFindGroup, btnJoinGroup;
-    private ListView lvPublicGroups;
+    private EditText etGroupCode;
+    private Button btnJoinGroup;
     private GroupManager groupManager;
     private String userId;
-    private List<Group> publicGroups;
-    private List<Group> filteredGroups;
-    private ArrayAdapter<String> groupsAdapter;
-    private Group selectedGroup;
+    private FirebaseFirestore db;
+    private ProgressBar progressBar;
+    private TextInputLayout tilGroupCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,102 +31,65 @@ public class JoinNewGroupActivity extends AppCompatActivity {
         initializeViews();
         setupListeners();
         initializeFirebase();
-        fetchPublicGroups();
     }
 
     private void initializeViews() {
         btnBack = findViewById(R.id.btnBack);
-        etGroupSearch = findViewById(R.id.etGroupSearch);
-        btnFindGroup = findViewById(R.id.btnFindGroup);
-        lvPublicGroups = findViewById(R.id.lvPublicGroups);
+        tilGroupCode = findViewById(R.id.tilGroupCode);
+        etGroupCode = findViewById(R.id.etGroupCode);
         btnJoinGroup = findViewById(R.id.btnJoinGroup);
-
-        publicGroups = new ArrayList<>();
-        filteredGroups = new ArrayList<>();
-        groupsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<>());
-        lvPublicGroups.setAdapter(groupsAdapter);
-        btnJoinGroup.setEnabled(false); // Initially disabled until a group is selected
+        btnJoinGroup.setText("Join Group");
+        progressBar = findViewById(R.id.progressBar);
     }
 
     private void setupListeners() {
         btnBack.setOnClickListener(v -> finish());
-        btnFindGroup.setOnClickListener(v -> searchGroups());
-        lvPublicGroups.setOnItemClickListener((parent, view, position, id) -> {
-            selectedGroup = filteredGroups.get(position);
-            btnJoinGroup.setEnabled(true);
-        });
         btnJoinGroup.setOnClickListener(v -> joinGroup());
     }
 
     private void initializeFirebase() {
         groupManager = new GroupManager();
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-    }
-
-    private void fetchPublicGroups() {
-        groupManager.getPublicGroups(new GroupManager.OnUserGroupsListener() {
-            @Override
-            public void onGroupsFetched(List<Group> groups) {
-                publicGroups.clear();
-                publicGroups.addAll(groups);
-                filteredGroups.clear();
-                filteredGroups.addAll(groups);
-                updateGroupsList();
-            }
-
-            @Override
-            public void onFailure(String error) {
-                Toast.makeText(JoinNewGroupActivity.this, "Error fetching groups: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void searchGroups() {
-        String query = etGroupSearch.getText().toString().trim().toLowerCase();
-        filteredGroups.clear();
-        if (query.isEmpty()) {
-            filteredGroups.addAll(publicGroups);
-        } else {
-            for (Group group : publicGroups) {
-                if (group.getName().toLowerCase().contains(query)) {
-                    filteredGroups.add(group);
-                }
-            }
-        }
-        updateGroupsList();
-        if (filteredGroups.isEmpty()) {
-            Toast.makeText(this, "No groups found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void updateGroupsList() {
-        List<String> groupNames = new ArrayList<>();
-        for (Group group : filteredGroups) {
-            groupNames.add(group.getName());
-        }
-        groupsAdapter.clear();
-        groupsAdapter.addAll(groupNames);
-        groupsAdapter.notifyDataSetChanged();
-        selectedGroup = null;
-        btnJoinGroup.setEnabled(false); // Disable until a new group is selected
+        db = FirebaseFirestore.getInstance();
     }
 
     private void joinGroup() {
-        if (selectedGroup == null) {
-            Toast.makeText(this, "Please select a group", Toast.LENGTH_SHORT).show();
+        String code = etGroupCode.getText().toString().trim();
+        if (code.isEmpty()) {
+            tilGroupCode.setError("Please enter a group code");
             return;
         }
-        groupManager.joinGroup(userId, selectedGroup.getGroupId(), new GroupManager.OnGroupOperationListener() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(JoinNewGroupActivity.this, "Joined group successfully", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-
-            @Override
-            public void onFailure(String error) {
-                Toast.makeText(JoinNewGroupActivity.this, "Error joining group: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+        tilGroupCode.setError(null);
+        progressBar.setVisibility(View.VISIBLE);
+        db.collection("groups")
+                .whereEqualTo("code", code)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    progressBar.setVisibility(View.GONE);
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        Group group = queryDocumentSnapshots.getDocuments().get(0).toObject(Group.class);
+                        if (group != null) {
+                            groupManager.joinGroup(userId, group.getGroupId(), new GroupManager.OnGroupOperationListener() {
+                                @Override
+                                public void onSuccess() {
+                                    Toast.makeText(JoinNewGroupActivity.this, "Joined group: " + group.getName(), Toast.LENGTH_SHORT).show();
+                                    finish();
+                                }
+                                @Override
+                                public void onFailure(String error) {
+                                    Toast.makeText(JoinNewGroupActivity.this, "Error joining group: " + error, Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } else {
+                            tilGroupCode.setError("Invalid group code");
+                        }
+                    } else {
+                        tilGroupCode.setError("Group not found");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    tilGroupCode.setError("Error finding group");
+                });
     }
 }

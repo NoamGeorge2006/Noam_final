@@ -27,7 +27,7 @@ public class EventManager {
     // Delete an event from Firestore
     public void deleteEvent(String eventId, String userId, OnEventOperationListener listener) {
         Log.d(TAG, "Attempting to delete event: " + eventId + " for user: " + userId);
-        
+
         // First verify that the event belongs to the user
         db.collection("events")
                 .document(eventId)
@@ -66,7 +66,7 @@ public class EventManager {
     // Get events for a user (only their own events)
     public void getUserEvents(String userId, OnEventsFetchedListener listener) {
         Log.d(TAG, "Querying events for user: " + userId);
-        
+
         // Query only events that belong to this user
         db.collection("events")
                 .whereEqualTo("userId", userId)
@@ -87,43 +87,73 @@ public class EventManager {
                 });
     }
 
-    // Get public events (events that are marked as public)
-    public void getPublicEvents(OnEventsFetchedListener listener) {
-        Log.d(TAG, "Querying public events");
-        
+    // Get public events from followed users
+    public void getFollowedUsersPublicEvents(String userId, List<String> followedUserIds, OnEventsFetchedListener listener) {
+        Log.d(TAG, "Querying public events from followed users for user: " + userId);
+
+        if (followedUserIds == null || followedUserIds.isEmpty()) {
+            Log.d(TAG, "No followed users found");
+            listener.onEventsFetched(new ArrayList<>());
+            return;
+        }
+
+        // Query public events from followed users
         db.collection("events")
+                .whereIn("userId", followedUserIds)
                 .whereEqualTo("isPublic", true)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> events = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Event event = document.toObject(Event.class);
-                        Log.d(TAG, "Found public event: " + event.getTitle());
+                        Log.d(TAG, "Found public event from followed user: " + event.getTitle() + 
+                            ", UserID: " + event.getUserId() + 
+                            ", isPublic: " + event.isPublic());
                         events.add(event);
                     }
-                    Log.d(TAG, "Total public events fetched: " + events.size());
+                    Log.d(TAG, "Total public events fetched from followed users: " + events.size());
                     listener.onEventsFetched(events);
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error fetching public events", e);
+                    Log.e(TAG, "Error fetching public events from followed users", e);
                     listener.onFailure(e.getMessage());
                 });
     }
 
-    // Helper method to fetch private events
-    private void fetchPrivateEvents(String userId, List<Event> events, OnEventsFetchedListener listener) {
-        db.collection("events")
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("isPublic", false)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Event event = document.toObject(Event.class);
-                        events.add(event);
+    // Get all events for a user (own events + public events from followed users)
+    public void getAllUserEvents(String userId, List<String> followedUserIds, OnEventsFetchedListener listener) {
+        Log.d(TAG, "Querying all events for user: " + userId);
+
+        // First get user's own events
+        getUserEvents(userId, new OnEventsFetchedListener() {
+            @Override
+            public void onEventsFetched(List<Event> ownEvents) {
+                // Then get public events from followed users
+                getFollowedUsersPublicEvents(userId, followedUserIds, new OnEventsFetchedListener() {
+                    @Override
+                    public void onEventsFetched(List<Event> followedEvents) {
+                        // Combine both lists
+                        List<Event> allEvents = new ArrayList<>(ownEvents);
+                        allEvents.addAll(followedEvents);
+                        Log.d(TAG, "Total events (own + followed): " + allEvents.size());
+                        listener.onEventsFetched(allEvents);
                     }
-                    listener.onEventsFetched(events);
-                })
-                .addOnFailureListener(e -> listener.onFailure(e.getMessage()));
+
+                    @Override
+                    public void onFailure(String error) {
+                        Log.e(TAG, "Error fetching followed users' events: " + error);
+                        // Still return own events even if followed users' events failed
+                        listener.onEventsFetched(ownEvents);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Error fetching own events: " + error);
+                listener.onFailure(error);
+            }
+        });
     }
 
     // Listener interfaces

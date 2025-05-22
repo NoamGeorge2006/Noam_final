@@ -4,6 +4,9 @@
         android:id="@+id/joinGroup"
         android:title="Join a new group" />
     <item
+        android:id="@+id/createGroup"
+        android:title="Create a new group" />
+    <item
         android:id="@+id/addContact"
         android:title="Add a new contact" />
 </menu>

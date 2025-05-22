@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class EventListActivity extends AppCompatActivity {
     private EventAdapter eventAdapter;
     private EventManager eventManager;
     private List<Event> eventList;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +87,7 @@ public class EventListActivity extends AppCompatActivity {
 
     private void initializeFirebase() {
         eventManager = new EventManager();
+        db = FirebaseFirestore.getInstance();
     }
 
     private void loadEvents() {
@@ -102,40 +105,63 @@ public class EventListActivity extends AppCompatActivity {
         Log.d("EventListActivity", "Loading events for date: " + selectedDateStr);
 
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        eventManager.getUserEvents(userId, new EventManager.OnEventsFetchedListener() {
-            @Override
-            public void onEventsFetched(List<Event> events) {
-                Log.d("EventListActivity", "Fetched " + events.size() + " events");
-                eventList.clear();
-                SimpleDateFormat inputFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
-                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                for (Event event : events) {
-                    try {
-                        String eventDateStr = event.getDate();
-                        Date eventDate = inputFormat.parse(eventDateStr);
-                        String normalizedEventDate = outputFormat.format(eventDate);
-                        Log.d("EventListActivity", "Checking event: " + event.getTitle() + ", Date: " + eventDateStr + ", Normalized: " + normalizedEventDate + ", isPublic: " + event.isPublic());
-                        if (normalizedEventDate.equals(selectedDateStr)) {
-                            Log.d("EventListActivity", "Adding event: " + event.getTitle());
-                            eventList.add(event);
-                        }
-                    } catch (Exception e) {
-                        Log.e("EventListActivity", "Error parsing event date: " + event.getDate() + ", Error: " + e.getMessage());
-                    }
-                }
-                eventAdapter.notifyDataSetChanged();
-                if (eventList.isEmpty()) {
-                    Log.d("EventListActivity", "No events for " + selectedDateStr);
-                    Toast.makeText(EventListActivity.this, "No events for this date", Toast.LENGTH_SHORT).show();
-                }
-            }
+        
+        // First get the user's following list
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                User currentUser = documentSnapshot.toObject(User.class);
+                if (currentUser != null) {
+                    List<String> followingList = currentUser.getFollowing();
+                    Log.d("EventListActivity", "User is following " + followingList.size() + " users");
 
-            @Override
-            public void onFailure(String error) {
-                Log.e("EventListActivity", "Error fetching events: " + error);
-                Toast.makeText(EventListActivity.this, "Error fetching events: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
+                    // Now fetch all events (own + followed users' public events)
+                    eventManager.getAllUserEvents(userId, followingList, new EventManager.OnEventsFetchedListener() {
+                        @Override
+                        public void onEventsFetched(List<Event> events) {
+                            Log.d("EventListActivity", "Fetched " + events.size() + " total events");
+                            eventList.clear();
+                            SimpleDateFormat inputFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+                            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            
+                            for (Event event : events) {
+                                try {
+                                    String eventDateStr = event.getDate();
+                                    Date eventDate = inputFormat.parse(eventDateStr);
+                                    String normalizedEventDate = outputFormat.format(eventDate);
+                                    Log.d("EventListActivity", "Checking event: " + event.getTitle() + 
+                                        ", Date: " + eventDateStr + 
+                                        ", Normalized: " + normalizedEventDate + 
+                                        ", UserID: " + event.getUserId() + 
+                                        ", isPublic: " + event.isPublic());
+                                    
+                                    if (normalizedEventDate.equals(selectedDateStr)) {
+                                        Log.d("EventListActivity", "Adding event: " + event.getTitle());
+                                        eventList.add(event);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e("EventListActivity", "Error parsing event date: " + event.getDate() + ", Error: " + e.getMessage());
+                                }
+                            }
+                            
+                            eventAdapter.notifyDataSetChanged();
+                            if (eventList.isEmpty()) {
+                                Log.d("EventListActivity", "No events for " + selectedDateStr);
+                                Toast.makeText(EventListActivity.this, "No events for this date", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(String error) {
+                            Log.e("EventListActivity", "Error fetching events: " + error);
+                            Toast.makeText(EventListActivity.this, "Error fetching events: " + error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("EventListActivity", "Error fetching user data: " + e.getMessage());
+                Toast.makeText(this, "Error loading user data", Toast.LENGTH_SHORT).show();
+            });
     }
 
     @Override

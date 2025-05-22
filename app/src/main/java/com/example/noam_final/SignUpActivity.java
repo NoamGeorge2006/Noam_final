@@ -20,6 +20,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -160,22 +164,46 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void addAccount(String email, String password) {
+        String name = etName.getText().toString().trim();
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     showLoading(false);
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        showToast(SUCCESS_SIGNUP);
-                        startActivity(new Intent(SignUpActivity.this, HomePageActivity.class));
-                        finish();
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            String userId = firebaseUser.getUid();
+
+                            // בניית מסמך המשתמש
+                            Map<String, Object> userMap = new HashMap<>();
+                            userMap.put("uid", userId);
+                            userMap.put("email", email);
+                            userMap.put("name", name);
+                            userMap.put("isPrivate", false); // ברירת מחדל: משתמש ציבורי
+                            userMap.put("followers", new ArrayList<String>()); // רשימת עוקבים ריקה
+                            userMap.put("followRequests", new ArrayList<String>()); // בקשות ריקות
+
+                            // שמירה ב-Firestore
+                            db.collection("users").document(userId)
+                                    .set(userMap)
+                                    .addOnSuccessListener(aVoid -> {
+                                        showToast(SUCCESS_SIGNUP);
+                                        startActivity(new Intent(SignUpActivity.this, HomePageActivity.class));
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        showToast("Failed to save user data: " + e.getMessage());
+                                    });
+                        }
                     } else {
-                        String errorMessage = task.getException() != null ? 
-                            task.getException().getMessage() : 
-                            "Sign up failed. Please try again.";
+                        String errorMessage = task.getException() != null ?
+                                task.getException().getMessage() :
+                                "Sign up failed. Please try again.";
                         showToast(errorMessage);
                     }
                 });
     }
+
 
     private boolean isValidEmail(String email) {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches();
