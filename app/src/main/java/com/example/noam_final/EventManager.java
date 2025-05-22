@@ -63,6 +63,70 @@ public class EventManager {
                 });
     }
 
+    // Remove an event from a user's calendar (for events they didn't create)
+    public void removeEventFromCalendar(String eventId, String userId, OnEventOperationListener listener) {
+        Log.d(TAG, "Attempting to remove event from calendar: " + eventId + " for user: " + userId);
+        
+        // First verify that the event exists and user is not the creator
+        db.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Event event = documentSnapshot.toObject(Event.class);
+                        if (event != null && !event.getUserId().equals(userId)) {
+                            // Add the event to the user's hidden events list
+                            db.collection("users")
+                                    .document(userId)
+                                    .get()
+                                    .addOnSuccessListener(userDoc -> {
+                                        User user = userDoc.toObject(User.class);
+                                        if (user != null) {
+                                            List<String> hiddenEvents = user.getHiddenEvents();
+                                            if (hiddenEvents == null) {
+                                                hiddenEvents = new ArrayList<>();
+                                            }
+                                            if (!hiddenEvents.contains(eventId)) {
+                                                hiddenEvents.add(eventId);
+                                                db.collection("users")
+                                                        .document(userId)
+                                                        .update("hiddenEvents", hiddenEvents)
+                                                        .addOnSuccessListener(aVoid -> {
+                                                            Log.d(TAG, "Event successfully removed from calendar");
+                                                            listener.onSuccess();
+                                                        })
+                                                        .addOnFailureListener(e -> {
+                                                            Log.e(TAG, "Error removing event from calendar", e);
+                                                            listener.onFailure(e.getMessage());
+                                                        });
+                                            } else {
+                                                Log.d(TAG, "Event already hidden");
+                                                listener.onSuccess();
+                                            }
+                                        } else {
+                                            Log.e(TAG, "User not found");
+                                            listener.onFailure("User not found");
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error fetching user data", e);
+                                        listener.onFailure(e.getMessage());
+                                    });
+                        } else {
+                            Log.e(TAG, "User is the creator of this event");
+                            listener.onFailure("You cannot remove your own events from your calendar");
+                        }
+                    } else {
+                        Log.e(TAG, "Event not found");
+                        listener.onFailure("Event not found");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error checking event", e);
+                    listener.onFailure(e.getMessage());
+                });
+    }
+
     // Get events for a user (only their own events)
     public void getUserEvents(String userId, OnEventsFetchedListener listener) {
         Log.d(TAG, "Querying events for user: " + userId);
@@ -97,25 +161,41 @@ public class EventManager {
             return;
         }
 
-        // Query public events from followed users
-        db.collection("events")
-                .whereIn("userId", followedUserIds)
-                .whereEqualTo("isPublic", true)
+        // First get the user's hidden events
+        db.collection("users")
+                .document(userId)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Event> events = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Event event = document.toObject(Event.class);
-                        Log.d(TAG, "Found public event from followed user: " + event.getTitle() + 
-                            ", UserID: " + event.getUserId() + 
-                            ", isPublic: " + event.isPublic());
-                        events.add(event);
-                    }
-                    Log.d(TAG, "Total public events fetched from followed users: " + events.size());
-                    listener.onEventsFetched(events);
+                .addOnSuccessListener(documentSnapshot -> {
+                    User user = documentSnapshot.toObject(User.class);
+                    List<String> hiddenEvents = user != null ? user.getHiddenEvents() : new ArrayList<>();
+                    
+                    // Query public events from followed users
+                    db.collection("events")
+                            .whereIn("userId", followedUserIds)
+                            .whereEqualTo("isPublic", true)
+                            .get()
+                            .addOnSuccessListener(queryDocumentSnapshots -> {
+                                List<Event> events = new ArrayList<>();
+                                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                    Event event = document.toObject(Event.class);
+                                    // Only add events that aren't hidden
+                                    if (!hiddenEvents.contains(event.getId())) {
+                                        Log.d(TAG, "Found public event from followed user: " + event.getTitle() + 
+                                            ", UserID: " + event.getUserId() + 
+                                            ", isPublic: " + event.isPublic());
+                                        events.add(event);
+                                    }
+                                }
+                                Log.d(TAG, "Total public events fetched from followed users: " + events.size());
+                                listener.onEventsFetched(events);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error fetching public events from followed users", e);
+                                listener.onFailure(e.getMessage());
+                            });
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error fetching public events from followed users", e);
+                    Log.e(TAG, "Error fetching user's hidden events", e);
                     listener.onFailure(e.getMessage());
                 });
     }

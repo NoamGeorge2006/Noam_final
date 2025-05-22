@@ -76,8 +76,15 @@ public class FollowRequestsActivity extends AppCompatActivity {
                     List<User> users = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         User user = document.toObject(User.class);
-                        if (!user.getUid().equals(currentUserId)) {
-                            users.add(user);
+                        if (user != null) {
+                            // Explicitly get the 'isPrivate' field from the document
+                            Boolean isPrivateBoolean = document.getBoolean("isPrivate");
+                            boolean isPrivate = isPrivateBoolean != null ? isPrivateBoolean : false;
+                            user.setPrivate(isPrivate);
+
+                            if (!user.getUid().equals(currentUserId)) {
+                                users.add(user);
+                            }
                         }
                     }
                     userAdapter.setUsers(users);
@@ -122,21 +129,39 @@ public class FollowRequestsActivity extends AppCompatActivity {
                         Toast.makeText(this, "Error following user", Toast.LENGTH_SHORT).show();
                     });
         } else { // User is private
-            String requestId = UUID.randomUUID().toString();
-            Map<String, Object> request = new HashMap<>();
-            request.put("fromUserId", currentUserId);
-            request.put("toUserId", user.getUid());
-            request.put("status", "pending");
-            request.put("timestamp", System.currentTimeMillis());
+            // Check if a pending request already exists
+            db.collection("follow_requests")
+                    .whereEqualTo("fromUserId", currentUserId)
+                    .whereEqualTo("toUserId", user.getUid())
+                    .whereEqualTo("status", "pending")
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            // No pending request, send a new one
+                            String requestId = UUID.randomUUID().toString();
+                            Map<String, Object> request = new HashMap<>();
+                            request.put("fromUserId", currentUserId);
+                            request.put("toUserId", user.getUid());
+                            request.put("status", "pending");
+                            request.put("timestamp", System.currentTimeMillis());
 
-            db.collection("follow_requests").document(requestId).set(request)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Follow request sent to " + user.getEmail(), Toast.LENGTH_SHORT).show();
-                        loadPendingRequests();
+                            db.collection("follow_requests").document(requestId).set(request)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(this, "Follow request sent to " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                                        loadPendingRequests();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("FollowRequestsActivity", "Error sending follow request: " + e.getMessage());
+                                        Toast.makeText(this, "Error sending request", Toast.LENGTH_SHORT).show();
+                                    });
+                        } else {
+                            // Pending request already exists
+                            Toast.makeText(this, "Pending follow request already sent to " + user.getEmail(), Toast.LENGTH_SHORT).show();
+                        }
                     })
                     .addOnFailureListener(e -> {
-                        Log.e("FollowRequestsActivity", "Error sending follow request: " + e.getMessage());
-                        Toast.makeText(this, "Error sending request", Toast.LENGTH_SHORT).show();
+                        Log.e("FollowRequestsActivity", "Error checking for existing follow request: " + e.getMessage());
+                        Toast.makeText(this, "Error checking request status", Toast.LENGTH_SHORT).show();
                     });
         }
     }
@@ -149,7 +174,52 @@ public class FollowRequestsActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<DocumentSnapshot> pendingRequests = queryDocumentSnapshots.getDocuments();
-                    requestAdapter.setRequests(pendingRequests);
+                    List<FollowRequestDisplayItem> displayItems = new ArrayList<>();
+
+                    if (pendingRequests.isEmpty()) {
+                        requestAdapter.setRequests(new ArrayList<>()); // Clear the adapter if no requests
+                        return;
+                    }
+
+                    // Fetch user details for each pending request
+                    for (DocumentSnapshot requestDoc : pendingRequests) {
+                        String toUserId = requestDoc.getString("toUserId");
+                        if (toUserId != null) {
+                            db.collection("users").document(toUserId).get()
+                                    .addOnSuccessListener(userDoc -> {
+                                        User targetUser = userDoc.toObject(User.class);
+                                        if (targetUser != null) {
+                                            displayItems.add(new FollowRequestDisplayItem(requestDoc, targetUser));
+                                            // Check if all user details are fetched
+                                            if (displayItems.size() == pendingRequests.size()) {
+                                                requestAdapter.setRequests(displayItems);
+                                            }
+                                        } else {
+                                            Log.e("FollowRequestsActivity", "Target user not found for request: " + requestDoc.getId());
+                                            // Still add the item with limited info if user not found
+                                            displayItems.add(new FollowRequestDisplayItem(requestDoc, null));
+                                            if (displayItems.size() == pendingRequests.size()) {
+                                                requestAdapter.setRequests(displayItems);
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("FollowRequestsActivity", "Error fetching target user for request: " + requestDoc.getId() + ": " + e.getMessage());
+                                        // Still add the item with limited info on failure
+                                        displayItems.add(new FollowRequestDisplayItem(requestDoc, null));
+                                        if (displayItems.size() == pendingRequests.size()) {
+                                            requestAdapter.setRequests(displayItems);
+                                        }
+                                    });
+                        } else {
+                             Log.e("FollowRequestsActivity", "toUserId is null for request: " + requestDoc.getId());
+                             // Still add the item with limited info if toUserId is null
+                             displayItems.add(new FollowRequestDisplayItem(requestDoc, null));
+                             if (displayItems.size() == pendingRequests.size()) {
+                                 requestAdapter.setRequests(displayItems);
+                             }
+                        }
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Log.e("FollowRequestsActivity", "Error loading pending requests: " + e.getMessage());

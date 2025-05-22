@@ -7,37 +7,54 @@
 
 
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
         <ImageView
             android:id="@+id/menu_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:contentDescription="Menu"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/menu_icon"
-            />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp" />
 
         <ImageView
             android:id="@+id/plus_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:contentDescription="Add event"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="Add Event"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/plus_icon"
-            android:layout_marginLeft="320dp"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp" />
+
+        <ImageView
+            android:id="@+id/profile_icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="My Profile"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/my_profile_icon"
+            app:layout_constraintEnd_toStartOf="@id/plus_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
-    </LinearLayout>
 
 
     <LinearLayout

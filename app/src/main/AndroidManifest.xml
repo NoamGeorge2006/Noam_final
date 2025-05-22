@@ -82,6 +82,14 @@
             android:exported="true"/>
 
 
+        <activity android:name=".ProfileActivity"
+            android:exported="true"/>
+
+        <activity android:name=".MigrationActivity" />
+
+
+
+
 
 
 

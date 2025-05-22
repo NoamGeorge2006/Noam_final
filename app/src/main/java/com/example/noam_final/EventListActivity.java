@@ -64,6 +64,7 @@ public class EventListActivity extends AppCompatActivity {
                         intent.putExtra("eventIsPublic", event.isPublic());
                         intent.putExtra("eventLatitude", event.getLatitude());
                         intent.putExtra("eventLongitude", event.getLongitude());
+                        intent.putExtra("eventUserId", event.getUserId());
                         
                         Log.d("EventListActivity", "Starting EventDetailActivity with event: " + event.getTitle());
                         startActivity(intent);

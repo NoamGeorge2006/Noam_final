@@ -16,6 +16,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView tvEventTitle, tvEventDate, tvEventDescription, tvEventLocation, tvEventStatus;
     private EventManager eventManager;
     private String eventId;
+    private String eventUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,18 +38,29 @@ public class EventDetailActivity extends AppCompatActivity {
         // Set up back button
         btnBack.setOnClickListener(v -> finish());
 
-        // Set up delete button
-        btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog());
-
         // Load event details
         loadEventDetails();
     }
 
     private void showDeleteConfirmationDialog() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        boolean isCreator = currentUserId.equals(eventUserId);
+        
+        String title = isCreator ? "Delete Event" : "Remove from Calendar";
+        String message = isCreator ? 
+            "Are you sure you want to delete this event? This will remove it from everyone's calendar." :
+            "Are you sure you want to remove this event from your calendar? This will only hide it from your view.";
+        
         new AlertDialog.Builder(this)
-            .setTitle("Delete Event")
-            .setMessage("Are you sure you want to delete this event?")
-            .setPositiveButton("Delete", (dialog, which) -> deleteEvent())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(isCreator ? "Delete" : "Remove", (dialog, which) -> {
+                if (isCreator) {
+                    deleteEvent();
+                } else {
+                    removeFromCalendar();
+                }
+            })
             .setNegativeButton("Cancel", null)
             .show();
     }
@@ -75,6 +87,28 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    private void removeFromCalendar() {
+        if (eventId != null) {
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            eventManager.removeEventFromCalendar(eventId, userId, new EventManager.OnEventOperationListener() {
+                @Override
+                public void onSuccess() {
+                    Log.d("EventDetailActivity", "Event removed from calendar successfully");
+                    Toast.makeText(EventDetailActivity.this, "Event removed from your calendar", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    Log.e("EventDetailActivity", "Error removing event from calendar: " + error);
+                    Toast.makeText(EventDetailActivity.this, "Error removing event: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Invalid event ID", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void loadEventDetails() {
         // Retrieve event details from Intent
         eventId = getIntent().getStringExtra("eventId");
@@ -83,6 +117,7 @@ public class EventDetailActivity extends AppCompatActivity {
         String description = getIntent().getStringExtra("eventDescription");
         String location = getIntent().getStringExtra("eventLocation");
         boolean isPublic = getIntent().getBooleanExtra("eventIsPublic", false);
+        eventUserId = getIntent().getStringExtra("eventUserId");
 
         if (title == null || date == null) {
             Log.e("EventDetailActivity", "Invalid event data: title or date is null");
@@ -98,7 +133,13 @@ public class EventDetailActivity extends AppCompatActivity {
         tvEventLocation.setText("Location: " + (location != null ? location : "N/A"));
         tvEventStatus.setText("Status: " + (isPublic ? "Public" : "Private"));
 
+        // Set up delete button based on whether user is the creator
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        boolean isCreator = currentUserId.equals(eventUserId);
+        btnDelete.setText(isCreator ? "Delete Event" : "Remove from Calendar");
+        btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog());
+
         // Log for debugging
-        Log.d("EventDetailActivity", "Loaded event: " + title);
+        Log.d("EventDetailActivity", "Loaded event: " + title + ", isCreator: " + isCreator);
     }
 }

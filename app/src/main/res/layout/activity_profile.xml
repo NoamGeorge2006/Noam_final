@@ -28,80 +28,68 @@
         android:gravity="center"
         android:orientation="vertical">
 
-
-
-
-
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="Follow Requests"
+            android:text="My Profile"
             android:textAlignment="center"
             android:textSize="40dp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etSearchUser"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter user email"
-            android:layout_marginTop="16dp" />
-
-        <Button
-            android:id="@+id/btnSearch"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search"
-            android:backgroundTint="@color/baby_pink"
-            android:textColor="@color/black"
-            android:layout_gravity="end"
+            android:text="Name"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="16sp"
             android:layout_marginTop="8dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search Results"
+            android:text="Email"
             android:textSize="18sp"
             android:layout_marginTop="16dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvUsers"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="8dp"
-            android:nestedScrollingEnabled="false" />
-
         <TextView
-            android:id="@+id/tvClickInstruction"
+            android:id="@+id/tvEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Click on a user in the search results to send a follow request."
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginTop="8dp"
-            android:gravity="center"/>
+            android:text="Loading..."
+            android:textSize="16sp"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pending Requests"
+            android:text="Privacy Status"
             android:textSize="18sp"
             android:layout_marginTop="16dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvPendingRequests"
+        <TextView
+            android:id="@+id/tvPrivacyStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="16sp"
             android:layout_marginTop="8dp" />
 
-
-
+        <Switch
+            android:id="@+id/switchPrivacy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Private Account"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
-
-
 
 </LinearLayout>

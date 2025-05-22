@@ -6,28 +6,27 @@ import java.util.List;
 public class User {
     private String uid;
     private String email;
+    private String name;
     private boolean isPrivate;
-    private List<String> groups;
-    private List<String> contacts;
     private List<String> followers;
     private List<String> following;
+    private List<String> hiddenEvents;
 
     public User() {
         this.isPrivate = false;
-        this.groups = new ArrayList<>();
-        this.contacts = new ArrayList<>();
         this.followers = new ArrayList<>();
         this.following = new ArrayList<>();
+        this.hiddenEvents = new ArrayList<>();
     }
 
-    public User(String uid, String email, boolean isPrivate) {
+    public User(String uid, String email, String name, boolean isPrivate, List<String> followers, List<String> following) {
         this.uid = uid;
         this.email = email;
-        this.isPrivate = isPrivate; // Updated to isPrivate
-        this.groups = new ArrayList<>();
-        this.contacts = new ArrayList<>();
-        this.followers = new ArrayList<>();
-        this.following = new ArrayList<>();
+        this.name = name;
+        this.isPrivate = isPrivate;
+        this.followers = followers != null ? followers : new ArrayList<>();
+        this.following = following != null ? following : new ArrayList<>();
+        this.hiddenEvents = new ArrayList<>();
     }
 
     // Getters
@@ -39,16 +38,8 @@ public class User {
         return email;
     }
 
-    public boolean isPrivate() { // Updated to isPrivate
+    public boolean isPrivate() {
         return isPrivate;
-    }
-
-    public List<String> getGroups() {
-        return groups;
-    }
-
-    public List<String> getContacts() {
-        return contacts;
     }
 
     public List<String> getFollowers() {
@@ -57,6 +48,14 @@ public class User {
 
     public List<String> getFollowing() {
         return following;
+    }
+
+    public List<String> getHiddenEvents() {
+        return hiddenEvents;
+    }
+
+    public String getName() {
+        return name;
     }
 
     // Setters
@@ -68,12 +67,8 @@ public class User {
         this.isPrivate = isPrivate;
     }
 
-    public void setGroups(List<String> groups) {
-        this.groups = groups;
-    }
-
-    public void setContacts(List<String> contacts) {
-        this.contacts = contacts;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setFollowers(List<String> followers) {
@@ -84,25 +79,8 @@ public class User {
         this.following = following;
     }
 
-    // Add/remove methods
-    public void addGroup(String groupId) {
-        if (!groups.contains(groupId)) {
-            groups.add(groupId);
-        }
-    }
-
-    public void removeGroup(String groupId) {
-        groups.remove(groupId);
-    }
-
-    public void addContact(String contactId) {
-        if (!contacts.contains(contactId)) {
-            contacts.add(contactId);
-        }
-    }
-
-    public void removeContact(String contactId) {
-        contacts.remove(contactId);
+    public void setHiddenEvents(List<String> hiddenEvents) {
+        this.hiddenEvents = hiddenEvents;
     }
 
     public void addFollower(String followerId) {
@@ -123,5 +101,15 @@ public class User {
 
     public void removeFollowing(String followingId) {
         following.remove(followingId);
+    }
+
+    public void addHiddenEvent(String eventId) {
+        if (!hiddenEvents.contains(eventId)) {
+            hiddenEvents.add(eventId);
+        }
+    }
+
+    public void removeHiddenEvent(String eventId) {
+        hiddenEvents.remove(eventId);
     }
 }

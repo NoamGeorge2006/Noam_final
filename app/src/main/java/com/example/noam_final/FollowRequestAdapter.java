@@ -12,20 +12,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdapter.RequestViewHolder> {
-    private List<DocumentSnapshot> requests;
+    private List<FollowRequestDisplayItem> displayItems;
     private OnRequestActionListener listener;
 
     public interface OnRequestActionListener {
-        void onCancelRequest(DocumentSnapshot request);
+        void onCancelRequest(DocumentSnapshot requestDocument);
     }
 
     public FollowRequestAdapter(OnRequestActionListener listener) {
-        this.requests = new ArrayList<>();
+        this.displayItems = new ArrayList<>();
         this.listener = listener;
     }
 
-    public void setRequests(List<DocumentSnapshot> requests) {
-        this.requests = requests;
+    public void setRequests(List<FollowRequestDisplayItem> displayItems) {
+        this.displayItems = displayItems;
         notifyDataSetChanged();
     }
 
@@ -38,12 +38,12 @@ public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdap
 
     @Override
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
-        holder.bind(requests.get(position));
+        holder.bind(displayItems.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return requests.size();
+        return displayItems.size();
     }
 
     class RequestViewHolder extends RecyclerView.ViewHolder {
@@ -57,15 +57,22 @@ public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdap
 
             btnCancel.setOnClickListener(v -> {
                 int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    listener.onCancelRequest(requests.get(position));
+                if (position != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onCancelRequest(displayItems.get(position).getRequestDocument());
                 }
             });
         }
 
-        public void bind(DocumentSnapshot request) {
-            String toUserId = request.getString("toUserId");
-            tvToUserId.setText("To: " + toUserId);
+        public void bind(FollowRequestDisplayItem item) {
+            if (item != null && item.getTargetUser() != null) {
+                String userName = item.getTargetUser().getName();
+                String userEmail = item.getTargetUser().getEmail();
+                // Display name if available, otherwise display email
+                tvToUserId.setText("To: " + (userName != null && !userName.isEmpty() ? userName : userEmail));
+            } else if (item != null) {
+                 // Display a placeholder if user data could not be fetched
+                 tvToUserId.setText("To: Unknown User");
+            }
         }
     }
 }
