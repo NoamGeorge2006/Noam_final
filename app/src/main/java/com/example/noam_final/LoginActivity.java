@@ -1,10 +1,12 @@
 package com.example.noam_final;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import android.preference.PreferenceManager;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText etEmail, etPassword;
@@ -21,6 +24,8 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private CheckBox cbRememberMe;
+    private SharedPreferences sharedPreferences;
 
     // Constants for validation and messages
     private static final String ERROR_EMPTY_FIELDS = "Please fill in all fields";
@@ -32,6 +37,16 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user is already logged in
+        mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) {
+            // User is signed in, go directly to HomePageActivity
+            startActivity(new Intent(LoginActivity.this, HomePageActivity.class));
+            finish();
+            return; // Skip the rest of onCreate
+        }
+
         setContentView(R.layout.activity_login);
 
         init();
@@ -45,11 +60,13 @@ public class LoginActivity extends AppCompatActivity {
         tvSignUp = findViewById(R.id.tvSignUp);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         progressBar = findViewById(R.id.progressBar);
+        cbRememberMe = findViewById(R.id.cbRememberMe);
 
-        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         progressBar.setVisibility(View.GONE);
+        loadRememberedCredentials();
     }
 
     private void addListener() {
@@ -109,6 +126,18 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     showLoading(false);
                     if (task.isSuccessful()) {
+                        if (cbRememberMe.isChecked()) {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("rememberedEmail", email);
+                            editor.putBoolean("rememberMe", true);
+                            editor.apply();
+                        } else {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.remove("rememberedEmail");
+                            editor.putBoolean("rememberMe", false);
+                            editor.apply();
+                        }
+
                         Toast.makeText(LoginActivity.this, SUCCESS_LOGIN, Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(LoginActivity.this, HomePageActivity.class));
                         finish();
@@ -117,5 +146,14 @@ public class LoginActivity extends AppCompatActivity {
                         showError(errorMessage);
                     }
                 });
+    }
+
+    private void loadRememberedCredentials() {
+        boolean rememberMe = sharedPreferences.getBoolean("rememberMe", false);
+        if (rememberMe) {
+            String rememberedEmail = sharedPreferences.getString("rememberedEmail", "");
+            etEmail.setText(rememberedEmail);
+            cbRememberMe.setChecked(true);
+        }
     }
 }

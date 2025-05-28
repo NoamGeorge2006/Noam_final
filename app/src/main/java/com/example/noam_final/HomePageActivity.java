@@ -1,6 +1,11 @@
 package com.example.noam_final;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,15 +15,22 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
+import android.Manifest;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public class HomePageActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
     private ImageView menu_icon;
     private ImageView profile_icon;
     private ImageView plus_icon;
     private FirebaseAuth mAuth;
+    private static final int REQUEST_SCHEDULE_EXACT_ALARM = 101;
+    private static final int REQUEST_POST_NOTIFICATIONS = 102;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +39,8 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         init();
         loadCalendarFragment();
         mAuth = FirebaseAuth.getInstance();
+        requestNotificationPermission();
+        startFollowRequestCheck();
     }
 
     private void init() {
@@ -36,6 +50,7 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
         plus_icon.setOnClickListener(this);
         profile_icon = findViewById(R.id.profile_icon);
         profile_icon.setOnClickListener(this);
+
     }
 
     private void loadCalendarFragment() {
@@ -93,7 +108,14 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             // Sign out from Firebase
             mAuth.signOut();
             Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-            
+
+            // Clear saved remember me preference
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove("rememberedEmail");
+            editor.putBoolean("rememberMe", false);
+            editor.apply();
+
             // Clear all activities from the stack and start MainActivity
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -101,5 +123,56 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
             finish();
         }
         return true;
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        REQUEST_POST_NOTIFICATIONS);
+            }
+        }
+    }
+
+    private void startFollowRequestCheck() {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // מבטל תזמון קודם אם קיים
+        alarmManager.cancel(pendingIntent);
+
+        long interval = 1000 * 60 * 30; // כל 30 דקות
+        long startTime = System.currentTimeMillis() + 5000; // התחלה עוד 5 שניות
+
+        try {
+            // אין צורך לבדוק SCHEDULE_EXACT_ALARM - פשוט להשתמש ב-setInexactRepeating
+            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, startTime, interval, pendingIntent);
+        } catch (SecurityException e) {
+            Toast.makeText(this, "Error in notification scheduling" + e.getMessage(), Toast.LENGTH_LONG).show();
+            android.util.Log.e("HomePageActivity", "SecurityException: " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_SCHEDULE_EXACT_ALARM) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startFollowRequestCheck();
+            } else {
+                Toast.makeText(this, "Alarm scheduling requires permission", Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == REQUEST_POST_NOTIFICATIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, notifications can proceed
+            } else {
+                Toast.makeText(this, "Notifications require permission", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }

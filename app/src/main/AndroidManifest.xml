@@ -11,6 +11,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- Alarm and Notification Permissions -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -33,6 +39,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Activities -->
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -42,57 +49,31 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainActivity"
-            android:exported="true" />
-
-        <activity android:name=".LoginActivity"
-            android:exported="true" />
-
-        <activity android:name=".SignUpActivity"
-            android:exported="true" />
-
-        <activity android:name=".ForgetPasswordActivity"
-            android:exported="true" />
-
-        <activity android:name=".HomePageActivity"
-            android:exported="true" />
-
-        <activity android:name=".CreditActivity"
-            android:exported="true" />
-
-        <activity android:name=".GuideActivity"
-            android:exported="true"/>
-
-        <activity android:name=".ContactActivity"
-            android:exported="true"/>
-
-        <activity android:name=".AddEventActivity"
-            android:exported="true"/>
-
-        <activity android:name=".EventListActivity"
-            android:exported="true"/>
-
-        <activity android:name=".EventDetailActivity"
-            android:exported="true"/>
-
-        <activity android:name=".FollowRequestsActivity"
-            android:exported="true"/>
-
-        <activity android:name=".FollowNotificationsActivity"
-            android:exported="true"/>
-
-
-        <activity android:name=".ProfileActivity"
-            android:exported="true"/>
-
+        <activity android:name=".MainActivity" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".ForgetPasswordActivity" />
+        <activity android:name=".HomePageActivity" />
+        <activity android:name=".CreditActivity" />
+        <activity android:name=".GuideActivity" />
+        <activity android:name=".ContactActivity" />
+        <activity android:name=".AddEventActivity" />
+        <activity android:name=".EventListActivity" />
+        <activity android:name=".EventDetailActivity" />
+        <activity android:name=".FollowRequestsActivity" />
+        <activity android:name=".FollowNotificationsActivity" />
+        <activity android:name=".ProfileActivity" />
         <activity android:name=".MigrationActivity" />
 
-
-
-
-
-
-
+        <!-- Receiver for Alarm -->
+        <receiver
+            android:name=".AlarmReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
