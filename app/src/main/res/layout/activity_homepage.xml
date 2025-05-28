@@ -79,17 +79,6 @@
             android:layout_weight="1"
             android:layout_marginTop="30dp"/>
 
-        <Button
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="@color/baby_pink"
-            android:text="Filter by"
-            android:textColor="@color/black"
-            android:drawableStart="@drawable/filter_icon"
-            android:padding="10dp"
-            android:drawablePadding="8dp"/>
-
 
     </LinearLayout>
 

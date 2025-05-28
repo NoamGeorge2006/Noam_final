@@ -4,19 +4,27 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class EventDetailActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private Button btnDelete;
-    private TextView tvEventTitle, tvEventDate, tvEventDescription, tvEventLocation, tvEventStatus;
+    private TextView tvEventTitle;
+    private TextView tvEventDateLabel, tvEventDateValue;
+    private TextView tvEventDescriptionLabel, tvEventDescriptionValue;
+    private TextView tvEventLocationLabel, tvEventLocationValue;
+    private TextView tvEventStatusLabel, tvEventStatusValue;
+    private Switch switchEventStatus;
     private EventManager eventManager;
     private String eventId;
     private String eventUserId;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,13 +35,21 @@ public class EventDetailActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnDelete = findViewById(R.id.btnDelete);
         tvEventTitle = findViewById(R.id.tvEventTitle);
-        tvEventDate = findViewById(R.id.tvEventDate);
-        tvEventDescription = findViewById(R.id.tvEventDescription);
-        tvEventLocation = findViewById(R.id.tvEventLocation);
-        tvEventStatus = findViewById(R.id.tvEventStatus);
 
-        // Initialize EventManager
+        tvEventDateLabel = findViewById(R.id.tvEventDateLabel);
+        tvEventDateValue = findViewById(R.id.tvEventDateValue);
+        tvEventDescriptionLabel = findViewById(R.id.tvEventDescriptionLabel);
+        tvEventDescriptionValue = findViewById(R.id.tvEventDescriptionValue);
+        tvEventLocationLabel = findViewById(R.id.tvEventLocationLabel);
+        tvEventLocationValue = findViewById(R.id.tvEventLocationValue);
+        tvEventStatusLabel = findViewById(R.id.tvEventStatusLabel);
+        tvEventStatusValue = findViewById(R.id.tvEventStatusValue);
+
+        switchEventStatus = findViewById(R.id.switchEventStatus);
+
+        // Initialize EventManager and Firestore
         eventManager = new EventManager();
+        db = FirebaseFirestore.getInstance();
 
         // Set up back button
         btnBack.setOnClickListener(v -> finish());
@@ -119,8 +135,8 @@ public class EventDetailActivity extends AppCompatActivity {
         boolean isPublic = getIntent().getBooleanExtra("eventIsPublic", false);
         eventUserId = getIntent().getStringExtra("eventUserId");
 
-        if (title == null || date == null) {
-            Log.e("EventDetailActivity", "Invalid event data: title or date is null");
+        if (title == null || date == null || eventId == null || eventUserId == null) {
+            Log.e("EventDetailActivity", "Invalid event data: title, date, eventId, or eventUserId is null");
             Toast.makeText(this, "Invalid event data", Toast.LENGTH_SHORT).show();
             finish();
             return;
@@ -128,10 +144,13 @@ public class EventDetailActivity extends AppCompatActivity {
 
         // Set text views
         tvEventTitle.setText(title);
-        tvEventDate.setText("Date: " + date);
-        tvEventDescription.setText("Description: " + (description != null ? description : "N/A"));
-        tvEventLocation.setText("Location: " + (location != null ? location : "N/A"));
-        tvEventStatus.setText("Status: " + (isPublic ? "Public" : "Private"));
+        tvEventDateValue.setText(date);
+        tvEventDescriptionValue.setText(description != null ? description : "N/A");
+        tvEventLocationValue.setText(location != null ? location : "N/A");
+        tvEventStatusValue.setText(isPublic ? "Public" : "Private");
+
+        // Set initial state of the switch
+        switchEventStatus.setChecked(isPublic);
 
         // Set up delete button based on whether user is the creator
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -139,7 +158,37 @@ public class EventDetailActivity extends AppCompatActivity {
         btnDelete.setText(isCreator ? "Delete Event" : "Remove from Calendar");
         btnDelete.setOnClickListener(v -> showDeleteConfirmationDialog());
 
+        // Set visibility of the switch based on whether the user is the creator
+        if (isCreator) {
+            switchEventStatus.setVisibility(android.view.View.VISIBLE);
+            // Set up switch listener only if the user is the creator
+            switchEventStatus.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                updateEventStatusInFirestore(eventId, isChecked);
+            });
+        } else {
+            switchEventStatus.setVisibility(android.view.View.GONE);
+        }
+
         // Log for debugging
-        Log.d("EventDetailActivity", "Loaded event: " + title + ", isCreator: " + isCreator);
+        Log.d("EventDetailActivity", "Loaded event: " + title + ", isCreator: " + isCreator + ", isPublic: " + isPublic);
+    }
+
+    private void updateEventStatusInFirestore(String eventId, boolean isPublic) {
+        db.collection("events").document(eventId)
+                .update("isPublic", isPublic)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("EventDetailActivity", "Event status updated successfully to: " + (isPublic ? "Public" : "Private"));
+                    Toast.makeText(EventDetailActivity.this, "Event status updated to " + (isPublic ? "Public" : "Private"), Toast.LENGTH_SHORT).show();
+                    // Update the status TextView text on success
+                    tvEventStatusValue.setText(isPublic ? "Public" : "Private");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EventDetailActivity", "Error updating event status", e);
+                    Toast.makeText(EventDetailActivity.this, "Error updating event status: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Revert the switch state on failure
+                    switchEventStatus.setChecked(!isPublic);
+                    // Revert the status TextView text on failure
+                    tvEventStatusValue.setText(!isPublic ? "Public" : "Private");
+                });
     }
 }

@@ -80,7 +80,7 @@
             android:layout_height="wrap_content"
             android:text="Click on a user in the search results to send a follow request."
             android:textSize="14sp"
-            android:textColor="#666666"
+            android:textColor="@color/dark_blue"
             android:layout_marginTop="8dp"
             android:gravity="center"/>
 

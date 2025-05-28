@@ -29,6 +29,7 @@ public class EventListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("EventListActivity", "onCreate called");
         setContentView(R.layout.activity_event_list);
 
         initializeViews();
@@ -92,6 +93,7 @@ public class EventListActivity extends AppCompatActivity {
     }
 
     private void loadEvents() {
+        Log.d("EventListActivity", "loadEvents called");
         long dateMillis = getIntent().getLongExtra("selectedDate", -1);
         if (dateMillis == -1) {
             Toast.makeText(this, "Invalid date", Toast.LENGTH_SHORT).show();
@@ -146,7 +148,7 @@ public class EventListActivity extends AppCompatActivity {
                             
                             eventAdapter.notifyDataSetChanged();
                             if (eventList.isEmpty()) {
-                                Log.d("EventListActivity", "No events for " + selectedDateStr);
+                                Log.d("EventListActivity", "No events for " + selectedDateStr + ", showing toast");
                                 Toast.makeText(EventListActivity.this, "No events for this date", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -168,6 +170,7 @@ public class EventListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadEvents(); // Refresh the list when returning to this activity
+        Log.d("EventListActivity", "onResume called");
+        // loadEvents(); // Refresh the list when returning to this activity
     }
 }

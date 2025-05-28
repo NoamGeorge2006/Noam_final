@@ -38,6 +38,13 @@
             android:textSize="40dp"
             android:textStyle="bold" />
 
+
+        <ImageView
+            android:layout_marginTop="5dp"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:src="@drawable/my_profile_icon" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

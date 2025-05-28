@@ -39,6 +39,12 @@
             android:textSize="40dp"
             android:textStyle="bold" />
 
+        <ImageView
+            android:layout_marginTop="25dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/second_logo_pic" />
+
         <TextView
             android:id="@+id/tvEventName"
             android:layout_width="wrap_content"
@@ -48,43 +54,113 @@
             android:textStyle="bold" />
 
         <!-- Date -->
-        <TextView
-            android:id="@+id/tvEventDate"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Date: "
-            android:textColor="@android:color/black"
-            android:textSize="16sp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvEventDateLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date: "
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tvEventDateValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
 
         <!-- Description -->
-        <TextView
-            android:id="@+id/tvEventDescription"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Description: "
-            android:textColor="@android:color/black"
-            android:textSize="16sp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvEventDescriptionLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description: "
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tvEventDescriptionValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
 
         <!-- Location -->
-        <TextView
-            android:id="@+id/tvEventLocation"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Location: "
-            android:textColor="@android:color/black"
-            android:textSize="16sp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvEventLocationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location: "
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tvEventLocationValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
 
         <!-- Public/Private Status -->
-        <TextView
-            android:id="@+id/tvEventStatus"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status: "
-            android:textColor="@android:color/black"
-            android:textSize="16sp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvEventStatusLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status: "
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/tvEventStatusValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp"/>
+
+            <Switch
+                android:id="@+id/switchEventStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textOff="Private"
+                android:textOn="Public"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -99,3 +175,5 @@
         android:textColor="@android:color/white" />
 
 </LinearLayout>
+
+
