@@ -137,26 +137,9 @@ public class HomePageActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void startFollowRequestCheck() {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        // מבטל תזמון קודם אם קיים
-        alarmManager.cancel(pendingIntent);
-
-        long interval = 1000 * 60 * 30; // כל 30 דקות
-        long startTime = System.currentTimeMillis() + 5000; // התחלה עוד 5 שניות
-
-        try {
-            // אין צורך לבדוק SCHEDULE_EXACT_ALARM - פשוט להשתמש ב-setInexactRepeating
-            alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, startTime, interval, pendingIntent);
-        } catch (SecurityException e) {
-            Toast.makeText(this, "Error in notification scheduling" + e.getMessage(), Toast.LENGTH_LONG).show();
-            android.util.Log.e("HomePageActivity", "SecurityException: " + e.getMessage());
-        }
+        AppAlarmManager alarmManager = new AppAlarmManager(this);
+        alarmManager.scheduleRepeatingAlarm();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

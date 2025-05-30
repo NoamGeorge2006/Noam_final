@@ -25,6 +25,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private String eventId;
     private String eventUserId;
     private FirebaseFirestore db;
+    private TextView tvEventName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,7 @@ public class EventDetailActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnDelete = findViewById(R.id.btnDelete);
         tvEventTitle = findViewById(R.id.tvEventTitle);
+        tvEventName = findViewById(R.id.tvEventName);
 
         tvEventDateLabel = findViewById(R.id.tvEventDateLabel);
         tvEventDateValue = findViewById(R.id.tvEventDateValue);
@@ -148,6 +150,25 @@ public class EventDetailActivity extends AppCompatActivity {
         tvEventDescriptionValue.setText(description != null ? description : "N/A");
         tvEventLocationValue.setText(location != null ? location : "N/A");
         tvEventStatusValue.setText(isPublic ? "Public" : "Private");
+
+        // Fetch and display creator's name
+        tvEventName.setText(""); // Clear before loading
+        db.collection("users").document(eventUserId).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    String creatorName = documentSnapshot.getString("name");
+                    if (creatorName != null && !creatorName.isEmpty()) {
+                        tvEventName.setText("Created by: " + creatorName);
+                    } else {
+                        tvEventName.setText("Created by: Unknown");
+                    }
+                } else {
+                    tvEventName.setText("Created by: Unknown");
+                }
+            })
+            .addOnFailureListener(e -> {
+                tvEventName.setText("Created by: Unknown");
+            });
 
         // Set initial state of the switch
         switchEventStatus.setChecked(isPublic);

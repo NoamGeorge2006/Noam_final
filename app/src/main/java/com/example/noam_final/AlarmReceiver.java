@@ -37,11 +37,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .collection("follow_requests")
                 .whereEqualTo("toUserId", currentUserId)
                 .whereEqualTo("status", "pending")
+                .whereEqualTo("notified", false)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     for (QueryDocumentSnapshot doc : querySnapshot) {
                         String fromUserId = doc.getString("fromUserId");
                         fetchUserEmailAndNotify(context, fromUserId, doc.getId(), "Follow Request");
+                        // Update notified to true so it won't notify again
+                        doc.getReference().update("notified", true);
                     }
                 })
                 .addOnFailureListener(e -> {

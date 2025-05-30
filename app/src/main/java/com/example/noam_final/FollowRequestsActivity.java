@@ -144,6 +144,7 @@ public class FollowRequestsActivity extends AppCompatActivity {
                             request.put("toUserId", user.getUid());
                             request.put("status", "pending");
                             request.put("timestamp", System.currentTimeMillis());
+                            request.put("notified", false);
 
                             db.collection("follow_requests").document(requestId).set(request)
                                     .addOnSuccessListener(aVoid -> {
