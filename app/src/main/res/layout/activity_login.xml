@@ -53,15 +53,15 @@
             android:layout_gravity="start"
             android:layout_marginTop="8dp"/>
 
-        <TextView
-            android:id="@+id/tvForgotPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Forgot Password?"
-            android:textAlignment="textEnd"
-            android:textStyle="bold"
-            android:textSize="20dp"
-            android:textColor="@color/dark_blue"/>
+<!--        <TextView-->
+<!--            android:id="@+id/tvForgotPassword"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Forgot Password?"-->
+<!--            android:textAlignment="textEnd"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textSize="20dp"-->
+<!--            android:textColor="@color/dark_blue"/>-->
 
 
         <Button

@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         tvSignUp = findViewById(R.id.tvSignUp);
-        tvForgotPassword = findViewById(R.id.tvForgotPassword);
+//        tvForgotPassword = findViewById(R.id.tvForgotPassword);
         progressBar = findViewById(R.id.progressBar);
         cbRememberMe = findViewById(R.id.cbRememberMe);
 
@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         tvSignUp.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, SignUpActivity.class)));
-        tvForgotPassword.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, ForgetPasswordActivity.class)));
+//        tvForgotPassword.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, ForgetPasswordActivity.class)));
     }
 
     private boolean validateInputs(String email, String password) {
